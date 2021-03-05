@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+  labels:
+    owner: Leo
+    version: '1.0'
+spec:
+  selector:
+    matchLabels:
+      name: jenkins
+  revisionHistoryLimit: 10
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: jenkins
+        owner: Leo
+        version: '1.0'
+    spec:
+      volumes:
+        - name: jenkins-data
+          emptyDir: {}
+      containers:
+        - name: jenkins
+          image: jenkins
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: jenkins-agent
+              containerPort: 50000
+              protocol: TCP
+            - name: jenkins-portal
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: jenkins-data
+              mountPath: /var/lib/jenkins
+              subPath: ''
+          livenessProbe:
+            httpGet:
+              host: ''
+              path: /login
+              port: 80
+              scheme: ''
+
